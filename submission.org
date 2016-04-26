@@ -1,0 +1,258 @@
+* Serverless applications for conceptually simpler securirty
+
+** DONE ABSTRACT
+CLOSED: [2016-04-26 Tue 12:01]
+
+There has been much written lately on decentralized, networked applications, both in the academic sphere, and in open source communities. Much prior work has explored the novel applications that decentralized systems can afford, such as communcations that are difficult to censor, or unforgeable, ledger-type datastores such as blockchains. 
+
+In this paper, I explore opportunities for implementing *traditional* applications using decentralized datastores. I argue that, contrary to common wisdom, decentralized applications can *simplify* the task of security engineering in some systems. I focus on a particular datastore called a Hyperlog, a simple, append-only datastore that can replicate peer-to-peer, e.g. over WebRTC. I contribute (1) fundamnetal princples for designing applications with hyperlogs, (2) a protocol for encrypted, verified communication over a hyperlog (3) a proof-of-concept for a decentralized, Craigslist-style application that makes use of some of these primatives and components.
+
+*** TODO sentence on what i discuss
+
+** DONE Introduction
+CLOSED: [2016-04-26 Tue 12:01]
+
+In the past year or two, decentralized systems have captured the imagination of academics adn developers worldwide. Bitcoin, the most noteable of the newer generation of applications, .... And, the reasoning behind decentralized systems are numerous: ....
+
+While novel systems ......, re-implementations of existing systems (such as social networks or chat) using decentralized technologies has remained alrgely an academic exercise /ref{twister}. In this paper, I argue that decentralized systems offer benefits beyond the durability and censorship-resistance properties generally touted in past studies. Here, I make the case for decentralized applications as a technology to make the lives of security engineers easier. With certain tradeoffs (e.g. in space and bandwidth), decentralized applications allow us to understand more precisely what kinds of attacks we might expect, and discourage reliance on outside factors that we believe to be secure (such as particular computing environments, password-restricted networks, access control mechansims, and so on). Instead, security engineers are forced to think strictly in terms of cryptographic primatives, which may be audited and tested separately from other pieces of the system.
+
+This very early-stage work makes several cursory contributions toward this general thesis: (1) some fundamental design patterns for working with Hyperlogs, one particular data structure, (2) some re-usable code components for building applications with this datastructure, most noteably a library that allows for verified, encrypted communication over hyperlogs, and (3) a proof-of-concept for a serverless, encrypted, and pseudonymous Craigslist clone. Generally, this paper seeks to demonstrate the feasibility of secure webapps that "scale horizontally," relying on the strength of peer swarms rather than the power of centralized data warehouses.
+
+As mentioned above, I focus here on Hyperlogs, an append-only data-structure in which all data is replicated to all peers. My reasoning here is twofold: (1) By making the baseline assumption that all peers share the datastructure, the need for cryptographic access-control policies are made plainly obvious, (2) Numerous libraries already existed for working with this data structure, including libraries that allow for peer discovery, and replication over WebRTC. This amounts to a plug-and-play, client-side application, which can work both on native environments, and in most modern web browsers.
+
+** Background
+
+*** Newer open-source efforts / Novel, decentralized applications
+
+**** Bitcoin
+
+**** Ethereum
+
+**** Dat
+
+**** Patchwork
+
+**** IPFS
+
+***** don't forget BitTorrent
+
+***** Which now works over webRTC
+
+*** Work on decentralizing
+
+**** Canonical academic papers
+
+***** TODO Find that canonical cite
+
+**** The traditional "why"s
+
+***** TODO Steal reasons from Redecentralize and other places
+** Hyperlogs
+*** A MERKLE DAG with causal linking
+**** APPEND-ONLY, AND SHARED, LIKE A BLOCKCHAIN
+
+**** BUT, NO CRYPTOGRAPHIC PROOF OF WORK
+
+**** JUST EC, FORKING DATA STRUCTURE
+**** SHOUT OUT TO HYPERDRIVE, HYPERKV, HYPERKDB-TREE, OSMP2P, DAT......
+
+***** BUT, THIS PAPER LOOKS AT *SECURITY* SPECIFICALLY, ESP SURROUNDING ACCESS CONTROL/IDENTITY
+
+**** important to fully explain relationship to blockchains/bitcoin
+*** Gossip-based protocols
+
+**** REPLICATES BY 'GOSSIP,' MUCH PAST WORK ON THIS
+
+***** FIND CITES FOR THIS
+
+**** SIGNALHUB
+
+***** KNOW-NOTHING INTRODUCTION SERVER
+
+*** Replicating the DAG
+
+Summary of this section
+
+**** WebRTC
+
+***** Quicky paragraph on WebRTC - the important bits
+
+**** Peer discovery
+
+***** Signalhubs - know-nothign peer discovery
+
+***** Could be a dht in the future, though it's an http server for now
+
+**** JUST SHARED KEYPAIR - PUBLIC FOR READING, PRIVATE FOR WRITING
+*** Peer-to-peer replication, with real-time built in
+**** ONCE INTRODUCE IS MADE, USE WEBRTC TO DO PEER-TO-PEER REPLICATION
+
+***** CITES FOR WEBRTC (W3C?)
+
+**** LETS US RUN IN THE BROWSER
+**** WE GET REAL TIME FOR FREE! 
+** Simplifying security engineering with Hyperlog applications
+
+In a hyperlog, all peers with a public key have read access to the shared database, and all peers with private keys have write access. To control read or write access to the log, we can take the simple measure of controlling access to the log's public and private keys. However, we cannot always assume that users will keep these shared keys secure. Furthermore, we may ocassionally want to restrict access within users of the hyperlog, who might have unique, persisting identities.
+
+In general, hyperlog-driven applications /cannot/ rely on firewalls, password-protected servers, security properties of particular environments or operating systems, or access conrol mechanisms that limit read and/or write access to particular databases. These applications must instead rely on well-understood cryptographic primatives, which can independently audit on various platforms. In other words, we are forced to encounter the security of our application in terms of what is cryptographically possible.
+
+Of course, such considerations are nothing new. In decentralized systems, however, only the peer architecture needs to be audited. Though it may need to be audited on various platforms, we can assume that a verified client with good validators will, if the implementation is correct, protect peers from bad actors on the network. By pushing such considerations to the client (and the client alone), several typical sources of security errors are removed.
+
+**** note: *FORCES* PROGRMMERS TO ENCOUNTER ISSUES OF CONSISTENCY
+
+***** NETWORK PARTITIONS, EVEN FORKING
+
+***** but, this is kind of out of scope i think
+*** TODO Surface area to test is smaller, comparatively
+**** If you can find client exploits and patch them, and test those patches on various pltforms (browsers, JS inteprreters, etc), the we can remove some "blind spots" that arise from assuming security in systems we "trust," but can't personally reason about, e.g. SSL
+***** TODO this is kind of a sketch argument IMO
+***** TODO must revise
+** DONE Hyperlog-driven applications: Patterns and princples
+CLOSED: [2016-04-26 Tue 12:07]
+
+This section introduces several principles for desinging applications around hyperlogs. .....
+
+*** Validate data when writing to, and reading from the log
+
+There could always be a bad actor with write access. Key managemnet doesn't solve everything, after all. ....
+
+*** Don't depend on ordering
+
+Hyperlogs guarantee only partial ordering. As in many decentralized systems, notions of a universal "now" are difficult establish \ref{}. ......
+
+Instead, one must use Hyperlog's linking mechanisms to establish "causal" relationships between nodes. For a messageboard, for example, messages might link to the last item in a given thread. ....
+
+Note that this linking structure could allow for more robust ordering, e.g. by implementing a vector clock ontop of a hyperlog. This is one potential direction for future work.
+
+*** We can always forget
+
+What if the hyperlog gets too big?
+
+Well, peers can delete things as they are read - in essense, refusing to replicate
+
+If all peers do this, we will save significant space
+** TODO Reusable components for hyperlog-driven applications
+*** Verified, encrypted communication over a hyperlog
+**** Explain hyperreal
+*** DONE Hyperlog manager
+CLOSED: [2016-04-26 Tue 13:07]
+One trivial, but important piece of infrastructure is a hyperlog manager, or a daemon that continuously seeds multiple hyperlogs. This daemon can allow other process to access hyperlogs for app-specific purposes. Alternatively, applications could wrap this daemon. For example, an application might run in the operating systme's menu bar or system dock, disallowing read or write access from outside the parent process.
+
+One example application is SwarmKV \ref{}, a key-value store built ontop of a swarmlog, which can run continuously as a system daemon. This simple, open-source tool allows data-synchronization among all peers who have shared swarmlog keys.
+** DONE A decentralized Craigslist clone using a hyperlog and WebRTC
+CLOSED: [2016-04-26 Tue 13:03]
+*** Motivating distributed, pseduonymous craigslist
+
+While some recent systems, most notably apple's imessage, have made public key crypto much more usable (even invisible) to everyday users, the persistent identities that these schemes offer are not always optimal, necessary, or even desireable. In some situations, pseudonymity is superior - consider Craigslist. Pseduonyms (provided by mirrored email addresses) allows users to post potentially sensitive ads without recourse, and to reply to these ads without fear of being bated or entrapped.
+
+However, Craigslist, in its current incarnation, is centralized. Law enforcement authorities can subpoena craigslist for records such as IP addresses, whcih can be used to identify and prosecute accused parties. Putting aside moral arguments, we might consider the added responsibility of application designers who must contend with government subpoenas due to the actions of their users. This phenomenon is due largely to the centralized nature of the system, namely, the fact that Craigslist (for example) has a priviliged "view" of the network. In a decentralized system, there is no particular, priviliged location to subpoena. Forensic techniques could certainly be developed to identify guilty parties, but crucially, /the developers of the system would not need to be complicit in forensic activity/.
+
+On the other side of this argument, parties do not need to be governmental agents, nor do they need to resort to hacking, to seek out bad actors.
+On platforms such as Twitter or Facebook, users must rely on moderators, or law enforcement, to track down people and ban them. Twitter is a particularly disastrous example of poor moderation \ref{}.
+
+While the specific techniques that might be used to identify and/or ban particular actors are outside the scope of this work (see Discussion), the fact that no privilige position n the network exists has far-reaching consequences, both for moderation strategies, and for the risk that application designers take on when they distribute applications.
+
+Finally, hyperog-driven systems allow groups to create their own version of the platform, controlling access within a certain subgroup by distributing keys only to certain parties. Such a practice is different from blacklists or blockbots \ref{}, as key-sharing acts as a community-driven whitelist, allowing access to everyone's application (rather than hiding posts from individual users).
+
+*** Implementing a decenralized classfieds board
+
+In this section, I describe the implementation of a hyperlog-driven classifieds board. this system has a few appealing properties: (1) users are pseudonymous on a per-thread basis, (2) conversations between posters and those who reply are encrypted, (3) the system updates in real-time, thanks to streaming WebRTC updates. A proof of concept implementation of this protocol is available on GitHub \ref{}.
+
+**** Posting a classified
+
+Classifies are posted publicly (e.g. in cleartext). For each post, posters adopt a new pseudonym, in the form of a keypair. (NaCL signing and encrypting keypairs are used for encrypting and signing \ref{}). The poster will add their message to the log, with a cleartext title and body, and attach their encryption pubkey. This will allow other users to reply to the classified with messages encrypted to the original poster.
+
+***** TODO  WE ALSO SIGN
+
+#+BEGIN_SRC js
+import nickslist from 'nickslist-core'
+let nl = nickslist(newpostcb)
+
+import keypair from 'keypair'
+var kp = keypair()
+nl.post(kp.encrypt.public, 'looking for shoes', 'anyone have any shoes?')
+#+END_SRC
+
+The poster now saves their keypair locally (presumably hashed), and associates it with the thread in question, for decrypting later replies.
+
+**** Replying to a classified
+
+Responses to classifieds should not be readable to anyone aside from the original poster, and the respondent themselves. We also don't want people to know who is responding. Even if respondents are pseudonymous, spammers could bother respondents with other commercial interests, or attempt to phish by posing as the orignal poster. (This concern doesn't extend to posters. Posters want people to respond to their classified).
+
+To address this problem, we come up with a plaintext message and generate a signing and encryption keypair, just like the original poster. Like before, we sign the message with our private key. However, instead of posting our message, encryption public key, and signature as plaintext, we encrypt *all* of these with the original poster's public key. Now, we have posted a single ciphertext block that links to the original message, using hyperlogs links. The poster of the original message will then see a message that links to their original post, which they can decrypt with their encryption private key and verify. 
+
+***** TODO think about verifying?
+
+#+BEGIN_SRC js
+import nickslist from 'nickslist-core'
+let nl = nickslist(newpostcb)
+
+import keypair from 'keypair'
+var kp = keypair()
+nl.reply('some-post-key', that_posts_pubkey, kp, 'i have some shoes i can lend you.')
+#+END_SRC
+
+Now, when the original poster wants to reply back to us, they can use this same response protocol to send us another ciphertext block, this time linking to our last message. 
+
+The original poster can maintain several simultaneous conversations this way, with each participant unable to know what the original poster is saying to anyone else. Of course, participants can know that the poster is talking to other people, and how many responses there are to a given post. However, participants cannot know how many different people the poster is speaking with, whether or not the poster themselves is responding, what different parties are saying, or generally how many /unique respondents/ there are to a given classified.
+
+**** Distributing the messageboard to peers
+
+This protocol is simply a proof of concept. To be useful, it would need to be wrapped in a UI, and should also include some solution for safely storing keypairs at rest. All of these concerns are outside of the scope of this proof of concept. Within scope, however, is the issue of distributing the messageboard to peers.
+
+Using Craigslist as a rough example, we can conceptualize each classifieds board as corresponding to a given geographic community. To make a classifieds board for one's neighborhood, one could build a general-purpose client, and distribute it widely, along with a checksum verifying the integrity of the source or client. To enable peers to join a given messageboard, one peer would generate a Swarmlog keypair (ed25519 keys for the Swarmlog), and distribute these keys to all people in the geographic community.
+
+** LIMITATIONS 
+*** NICKSLIST-SPECIFIC LIMITATIONS
+**** A leaked key could mean mad griefing
+***** Mechanisms for banning are a clear direction for future work (see below)
+**** Other stuff I wrote down
+
+HYPERLOGS ARE SHARED, AND APPEND-ONLY. PEOPLE WILL SEE THAT THERE ARE RESPONSES TO ADS - AND EVEN HOW MANY RESPNOSES THERE ARE. THERE'S NO WAY AROUND THAT, AT LEAST NONE I CAN SEE RIGHT NOW
+
+BECAUSE ALL POSTS ARE CIPHERTEXTS, WE HAVE NO IDEA IF A GIVEN POST IS ENCRYPTED TO US. CONSEQUENTLY, WE HAVE NO CHOICE BUT TO TRY DECRYPTING ALL POSTS THAT COULD BE ADDRESSED TO US. ONE SPAMMING TACTIC HERE IS, LINK A GOBLDIGOOK POST TO SOME CLASSIFIED OR REPLY, FORCING THE POSTER TO TRY DECRYPTING THE MESSAGE. IN CERTAIN CIRCUMSTNACES, THIS COULD BE USED FOR A SIDE CHANNEL ATTACK, AS SOMONE COULD TRY TO SUSS AT WHICH COMPUTER IS TRYING TO DECRYPT REPLIES TO WHICH MESSAGE, AS A WAY OF DE-ANONYMIZING POSTERS.
+
+PEOPLE WILL BE STORING MANY PK,SK PAIRS ON THEIR LOCAL MACHINE. IF THEY LOG ON FROM A DIFFERNET MACHINE, THESE KEYPAIRS WILL NTO FOLLOW THEM, AND THEY WON'T HAVE ACCESS TO ANY OF THEIR CONVERSATIONS! THERE ARE CERTAINLY WAYS TO STORE THESE KEYPAIRS IN TRANSMITTABLE MEDIA, BUT I HAVE NOT TOUCHED THIS PROBLEM FOR NOW, OPTING INSTEAD FOR HTML5 STORAGE VIA LEVEL-BROWSERIFY.
+
+FINALLY, WE STILL NEED SOME WAY OF ORGANIZING THE BOARD. (MISSED CONNECTIONS, FOR SALE BY OWNER, ETC). I HAVE NOT APPROACHED THIS YET, BUT IT SHOULD BE POSSIBLE BY ADDING SOME TAGS TO POSTS. AN APPEND-ONLY DATASTORE LENDS ITSELF WELL TO WORKING AS A deductive database like datomic, and a query language like datalog could easily help us out here 
+
+*** Obvious attacks
+
+**** Spam is SO easy
+
+**** Points to, maybe we should have keys within communities only
+** DISCUSSION
+*** No, the system is *not* secure just because the primatives are
+#+BEGIN_QUOTE
+I love cryptography. It tells me what part of the system not to bother attacking.
+#+END_QUOTE
+/Drew Gross/
+
+no, the system is NOT totally secure....
+** FUTURE WORK
+COMPONENTS TO BUILD, RESEARCH TO DO.
+
+*** BANNING
+
+**** ONE MAJOR BENEFIT TO CENTRALIZATION IS THE ABILITY TO BAN
+
+**** quickly describe banning strategy
+
+***** if we see keys encrpyted to us with a certain mesage type
+
+***** we hop onto that hyperlog
+
+***** optionally, we can "fork" the current log by replicating all existing data into the new log
+
+***** people to whom these keys were not encrypted will not have access to the new log
+
+**** PoC for this is clear direction for future work
+*** PRESENCE NOTIFICATION
+*** DATOMIC/DATALOG-TYPE DEDUCTIVE DATABASE
+*** DEFINITELY REAL SECURITY AUDITING ON MULTIPLE PLATFORMS
+*** USABILITY RESEARCH WITH LIVE APPLICATION
+*** Craigslist protocol above could generalize to 2-person chat
+**** FUTURE WORK COULD EXTEND THIS MODEL TO MULTI-PERSON PSEUDONYMOUS CHAT
+**** And could explore many-to-one chat, via different encryption prtoocls like PGP or newer protocols like private-box \ref{}
+** CONCLUSION
